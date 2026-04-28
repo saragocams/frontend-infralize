@@ -1,15 +1,12 @@
-import React from 'react';
-
 export default function Sidebar() {
   return (
-    <aside className="sidebar">
-      <nav>
-        <ul>
-          <li><a href="#dashboard">Dashboard</a></li>
-          <li><a href="#reports">Relatórios</a></li>
-          <li><a href="#settings">Configurações</a></li>
-        </ul>
-      </nav>
-    </aside>
+    <div className="sidebar">
+      <h2>Infralize</h2>
+
+      <div className="menu-item">Visão Geral</div>
+      <div className="menu-item active">Contratos</div>
+      <div className="menu-item">Relatórios</div>
+      <div className="menu-item">Configurações</div>
+    </div>
   );
 }
