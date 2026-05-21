@@ -177,9 +177,11 @@ function LoadingScreen({ fileName }) {
 
 function ResultScreen({ result, fileName, onReset }) {
   const [riscoIdx, setRiscoIdx] = useState(0);
-  const [activeFilter, setActiveFilter] = useState(null);
+  const [activeFilter, setActiveFilter] = useState(
+    (result.analise.riscos?.length ?? 0) === 0 ? "faltante" : null
+  );
 
-  const { analise, texto_extraido } = result;
+  const { analise, texto_extraido, ocr_warning } = result;
   const risco = analise.riscos?.[riscoIdx];
 
   const graves    = analise.riscos?.filter((r) => r.gravidade === "alta")  ?? [];
@@ -234,6 +236,13 @@ function ResultScreen({ result, fileName, onReset }) {
       </header>
 
       <main className="mx-auto max-w-[1200px] space-y-5 px-6 py-6">
+        {ocr_warning?.has_warning && (
+          <div className="flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-200">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+            <span><strong>Qualidade de extração baixa:</strong> {ocr_warning.message}</span>
+          </div>
+        )}
+
         {/* Título */}
         <div>
           <p className="text-xs uppercase tracking-wider text-ink-400">Análise</p>
@@ -251,9 +260,9 @@ function ResultScreen({ result, fileName, onReset }) {
             </p>
             <p className="mt-1 text-xs text-ink-500">Problemas e lacunas encontradas</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <SeverityChip count={graves.length}    cfg={GRAVIDADE_CONFIG.alta}  active={activeFilter === "alta"}     onClick={() => toggleFilter("alta")} />
-              <SeverityChip count={medias.length}    cfg={GRAVIDADE_CONFIG.media} active={activeFilter === "media"}    onClick={() => toggleFilter("media")} />
-              <FaltanteChip count={faltantes.length}                              active={activeFilter === "faltante"} onClick={() => toggleFilter("faltante")} />
+              {graves.length > 0 && <SeverityChip count={graves.length}    cfg={GRAVIDADE_CONFIG.alta}  active={activeFilter === "alta"}     onClick={() => toggleFilter("alta")} />}
+              {medias.length > 0 && <SeverityChip count={medias.length}    cfg={GRAVIDADE_CONFIG.media} active={activeFilter === "media"}    onClick={() => toggleFilter("media")} />}
+              {faltantes.length > 0 && <FaltanteChip count={faltantes.length} active={activeFilter === "faltante"} onClick={() => toggleFilter("faltante")} />}
             </div>
 
             {(expandedRiscos.length > 0 || showFaltantes) && (

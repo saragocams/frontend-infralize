@@ -27,7 +27,7 @@ export default function ClauseViewer({ nomeArquivo, risco, texto }) {
           </span>
           <div>
             <p className="text-sm font-semibold text-ink-900">{nomeArquivo}</p>
-            <p className="text-xs text-ink-400">{risco?.trecho_clausula ?? "Selecione uma cláusula"}</p>
+            <p className="text-xs text-ink-400">{risco?.trecho_clausula ?? "Texto extraído do contrato"}</p>
           </div>
         </div>
         <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-600 ring-1 ring-rose-200">

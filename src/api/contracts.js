@@ -12,7 +12,7 @@ import {
   buildGenericAnalysis,
 } from "../data/mockData.js";
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 const API_BASE = "/api";
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
