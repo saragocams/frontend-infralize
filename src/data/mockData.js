@@ -135,73 +135,56 @@ export const contractAnalyses = {
       riscos: [
         {
           id: "r1",
-          numero_clausula: "4.2",
-          pagina: 11,
-          trecho_clausula:
-            "Os custos com materiais extras não previstos na planilha orçamentária inicial, bem como os acréscimos decorrentes de variação de preço dos insumos, serão de responsabilidade exclusiva da CONTRATANTE, sem limitação de valor.",
+          trecho_clausula: "CLÁUSULA 4ª — RESPONSABILIDADE DE MATERIAIS",
           categoria: "Risco de Custo",
           gravidade: "alta",
           por_que_importa:
-            "Contratada pode gerar aditivos ilimitados sem aprovação prévia de valor.",
-          evidencia: "...sem limitação de valor.",
+            "Contratada pode gerar aditivos ilimitados sem aprovação prévia de valor. O contrato não prevê teto para custos extras, expondo a contratante a variações imprevisíveis.",
+          evidencia: "sem limitação de valor",
           pergunta_sugerida:
             "Posso negociar um cap percentual sobre a planilha-base e atrelar reajustes a um índice oficial?",
           confianca: 0.93,
-          problema_curto: "Aditivos sem teto financeiro",
-          impacto: { valor: "R$ 780K", subtitulo: "risco de estouro em alta de insumos" },
-          recomendacao: {
-            titulo: "Cap de reajuste + atrelar ao INCC-DI/FGV",
-            bullets: [
-              "Cap de 15% sobre planilha-base",
-              "Aprovação prévia obrigatória",
-            ],
-          },
         },
         {
           id: "r2",
-          numero_clausula: "9.4",
-          pagina: 23,
-          trecho_clausula:
-            "Em caso de atraso injustificado, a CONTRATADA pagará multa de 0,1% ao dia, limitada a 5% do valor do contrato.",
+          trecho_clausula: "CLÁUSULA 9ª — MULTAS E PENALIDADES",
           categoria: "Risco Jurídico",
           gravidade: "alta",
           por_que_importa:
-            "Multa muito abaixo da prática de mercado (10% típico). Em obra de R$ 8,2M, isso vira incentivo a atrasar.",
+            "Multa muito abaixo da prática de mercado (10% típico). Em obra de R$ 8,2M, isso representa um incentivo econômico ao atraso por parte da contratada.",
           evidencia: "limitada a 5% do valor do contrato",
           pergunta_sugerida:
-            "Podemos elevar o teto da multa para 10% e adicionar gatilhos por marco?",
+            "Podemos elevar o teto da multa para 10% e adicionar gatilhos por marco de entrega?",
           confianca: 0.88,
-          problema_curto: "Multa abaixo do mercado",
-          impacto: { valor: "R$ 350K", subtitulo: "perda esperada por atraso" },
-          recomendacao: {
-            titulo: "Multa de 10% + marcos contratuais",
-            bullets: ["Teto em 10% do valor", "Gatilhos por marco entregue"],
-          },
         },
         {
           id: "r3",
-          numero_clausula: "12.1",
-          pagina: 31,
-          trecho_clausula:
-            "O reajuste anual será calculado conforme negociação entre as partes, sem indexação a índice oficial.",
+          trecho_clausula: "CLÁUSULA 12ª — REAJUSTE",
           categoria: "Risco de Custo",
           gravidade: "media",
           por_que_importa:
-            "Reajuste sem índice abre brecha para imposição unilateral de valor.",
+            "Reajuste sem indexação a índice oficial abre brecha para imposição unilateral de valor pela contratada.",
           evidencia: "sem indexação a índice oficial",
-          pergunta_sugerida: "Qual índice oficial podemos vincular ao reajuste?",
+          pergunta_sugerida:
+            "Qual índice oficial (INCC-DI, IPCA) podemos vincular ao cálculo de reajuste anual?",
           confianca: 0.82,
-          problema_curto: "Reajuste sem índice",
-          impacto: { valor: "R$ 120K", subtitulo: "exposição estimada" },
-          recomendacao: {
-            titulo: "Atrelar a INCC-DI/FGV",
-            bullets: ["Reajuste anual indexado", "Gatilho mínimo de 12 meses"],
-          },
         },
       ],
       informacoes_faltantes: [
-        "Cronograma físico-financeiro detalhado",
-        "Anexo I com planilha-base assinada",
+        {
+          titulo: "Cronograma físico-financeiro detalhado",
+          motivo:
+            "Contratos de empreitada devem conter cronograma físico-financeiro vinculado ao pagamento. Sem ele, a contratante perde o controle sobre o avanço da obra e fica sem base para recusar pagamentos por serviços incompletos.",
+          exemplo:
+            "CLÁUSULA X — CRONOGRAMA FÍSICO-FINANCEIRO\n\nX.1 A CONTRATADA deverá apresentar, em até 10 (dez) dias úteis após a assinatura deste Contrato, cronograma físico-financeiro detalhado, discriminando as etapas de execução, os marcos de medição e os valores correspondentes a cada fase da obra.\n\nX.2 O cronograma físico-financeiro, após aprovado pela CONTRATANTE, passará a integrar este Contrato como Anexo II, sendo vinculante para fins de liberação de pagamentos.\n\nX.3 Qualquer alteração no cronograma aprovado deverá ser formalmente acordada entre as partes, mediante aditivo contratual.",
+        },
+        {
+          titulo: "Anexo I com planilha-base assinada",
+          motivo:
+            "A cláusula 4.2 referencia o Anexo I como limitador das responsabilidades da CONTRATADA, mas o anexo não está presente no documento. Sem a planilha-base assinada, qualquer custo extra pode ser contestado como 'não previsto'.",
+          exemplo:
+            "ANEXO I — PLANILHA-BASE DE MATERIAIS\n\nA presente planilha especifica os materiais de construção fornecidos pela CONTRATANTE, conforme referenciado na Cláusula 4.2 deste Contrato. Quaisquer materiais não listados neste Anexo são de responsabilidade exclusiva da CONTRATADA.\n\nOs preços unitários constantes nesta planilha servirão como referência para eventuais aditivos, sendo reajustados pelo INCC-DI acumulado no período.\n\nEste Anexo deve ser assinado por ambas as partes e rubricado em todas as páginas para ter validade contratual.",
+        },
       ],
       recomendacao:
         "Negociar cap de aditivos, atrelar reajustes a índice oficial e elevar o teto da multa por atraso antes da assinatura.",

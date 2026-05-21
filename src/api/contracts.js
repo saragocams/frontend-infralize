@@ -56,9 +56,23 @@ export async function getContract(id) {
   return res.json();
 }
 
-// Liga direto no endpoint real do backend: POST /analyze-contract
-// (vide main.py). Espera multipart/form-data com campo "file".
 export async function analyzeContract(file) {
+  if (USE_MOCK) {
+    await wait(2000);
+    const { texto_extraido, analise } = contractAnalyses["torre-sul"];
+    return {
+      ocr_warning: { has_warning: false, message: "" },
+      texto_extraido,
+      analise: {
+        tipo_documento: analise.tipo_documento,
+        confianca_geral: analise.confianca_geral,
+        resumo: analise.resumo,
+        riscos: analise.riscos,
+        informacoes_faltantes: analise.informacoes_faltantes,
+        recomendacao: analise.recomendacao,
+      },
+    };
+  }
   const form = new FormData();
   form.append("file", file);
   const res = await fetch(`${API_BASE}/analyze-contract`, {

@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  CheckCircle2,
-  Download,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronRight, Download, AlertTriangle, AlertCircle, Info } from "lucide-react";
 import Card from "../components/Card.jsx";
-import ScoreCard from "../components/ScoreCard.jsx";
 import ClauseViewer from "../components/ClauseViewer.jsx";
 import DiagnosticPanel from "../components/DiagnosticPanel.jsx";
 import { getContract } from "../api/contracts.js";
+
+const GRAVIDADE_CONFIG = {
+  alta:  { label: "Grave",    icon: AlertTriangle, color: "text-rose-600",   bg: "bg-rose-50",   ring: "ring-rose-200"  },
+  media: { label: "Média",    icon: AlertCircle,   color: "text-amber-600",  bg: "bg-amber-50",  ring: "ring-amber-200" },
+  baixa: { label: "Baixo",    icon: Info,          color: "text-emerald-600",bg: "bg-emerald-50",ring: "ring-emerald-200"},
+};
 
 export default function ContractAnalysis() {
   const { id } = useParams();
@@ -25,9 +26,7 @@ export default function ContractAnalysis() {
       .then((d) => alive && setData(d))
       .catch((e) => alive && setError(e.message))
       .finally(() => alive && setLoading(false));
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [id]);
 
   if (loading) {
@@ -51,152 +50,154 @@ export default function ContractAnalysis() {
   const { meta, analise, texto_extraido } = data;
   const risco = analise.riscos?.[riscoIdx];
 
+  const graves   = analise.riscos?.filter((r) => r.gravidade === "alta")  ?? [];
+  const medias   = analise.riscos?.filter((r) => r.gravidade === "media") ?? [];
+  const faltantes = analise.informacoes_faltantes ?? [];
+
   return (
     <div className="mx-auto max-w-[1200px] space-y-5">
       <nav className="flex items-center gap-1.5 text-xs text-ink-500">
         <Link to="/contratos" className="hover:text-ink-800">Contratos</Link>
         <ChevronRight className="h-3 w-3" />
-        <span className="text-ink-700">{meta.id}</span>
+        <span className="text-ink-700">{meta?.nome ?? id}</span>
       </nav>
 
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-wider text-ink-400">Análise</p>
-          <h1 className="text-2xl font-bold text-ink-900">{meta.nome}</h1>
+          <h1 className="text-2xl font-bold text-ink-900">{meta?.nome ?? id}</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Concluído em {analise.tempo_processamento}
-          </span>
-          <button className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700">
-            <Download className="h-4 w-4" />
-            Exportar
-          </button>
-        </div>
+        <button className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700">
+          <Download className="h-4 w-4" />
+          Exportar
+        </button>
       </header>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ScoreCard score={analise.score_risco} percentil={analise.percentil} />
-
-        <Card className="p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
-            Impacto Financeiro Est.
-          </p>
-          <p className="mt-3 text-3xl font-bold text-ink-900">
-            {analise.impacto_financeiro?.total}
-          </p>
-          <p className="mt-1 text-xs text-ink-500">Exposição máxima</p>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-ink-50/60 p-2.5">
-              <p className="text-[11px] uppercase tracking-wider text-ink-400">Custo</p>
-              <p className="mt-1 text-base font-bold text-rose-600">
-                {analise.impacto_financeiro?.custo}
-              </p>
-            </div>
-            <div className="rounded-lg bg-ink-50/60 p-2.5">
-              <p className="text-[11px] uppercase tracking-wider text-ink-400">Jurídico</p>
-              <p className="mt-1 text-base font-bold text-rose-600">
-                {analise.impacto_financeiro?.juridico}
-              </p>
-            </div>
-          </div>
-        </Card>
-
+      {/* Cláusulas críticas + Resumo */}
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="p-5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
             Cláusulas Críticas
           </p>
           <p className="mt-3 text-3xl font-bold text-ink-900">
-            {analise.riscos?.length ?? 0}
+            {(analise.riscos?.length ?? 0) + faltantes.length}
           </p>
-          <p className="mt-1 text-xs text-ink-500">Problemas encontrados</p>
+          <p className="mt-1 text-xs text-ink-500">Problemas e lacunas encontradas</p>
 
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            <CategoryChip color="rose" label={`${analise.contagem_categorias?.custo ?? 0} Custo`} />
-            <CategoryChip color="amber" label={`${analise.contagem_categorias?.juridico ?? 0} Jurídico`} />
-            <CategoryChip color="brand" label={`${analise.contagem_categorias?.inconsistencia ?? 0} Inconsist.`} />
+          <div className="mt-4 flex flex-wrap gap-2">
+            <SeverityChip count={graves.length}   cfg={GRAVIDADE_CONFIG.alta}  />
+            <SeverityChip count={medias.length}   cfg={GRAVIDADE_CONFIG.media} />
+            <FaltanteChip count={faltantes.length} />
           </div>
+        </Card>
+
+        <Card className="p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+            Resumo do contrato
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-ink-700">{analise.resumo}</p>
+          <p className="mt-3 text-xs text-ink-400">
+            Tipo:{" "}
+            <span className="font-semibold text-ink-700">{analise.tipo_documento}</span>
+          </p>
         </Card>
       </section>
 
-      {analise.riscos?.length > 1 ? (
+      {/* Navegação entre cláusulas */}
+      {analise.riscos?.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {analise.riscos.map((r, i) => (
-            <button
-              key={r.id ?? i}
-              onClick={() => setRiscoIdx(i)}
-              className={
-                "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors " +
-                (i === riscoIdx
-                  ? "bg-ink-900 text-white"
-                  : "bg-white text-ink-600 ring-1 ring-ink-100 hover:bg-ink-50")
-              }
-            >
-              Cláusula {r.numero_clausula} · {r.problema_curto}
-            </button>
-          ))}
+          {analise.riscos.map((r, i) => {
+            const cfg = GRAVIDADE_CONFIG[r.gravidade] ?? GRAVIDADE_CONFIG.baixa;
+            const label = r.trecho_clausula.length > 35
+              ? r.trecho_clausula.slice(0, 35) + "…"
+              : r.trecho_clausula;
+            return (
+              <button
+                key={r.id ?? i}
+                onClick={() => setRiscoIdx(i)}
+                className={
+                  "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors " +
+                  (i === riscoIdx
+                    ? "bg-ink-900 text-white"
+                    : "bg-white text-ink-600 ring-1 ring-ink-100 hover:bg-ink-50")
+                }
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${i === riscoIdx ? "bg-white" : cfg.color.replace("text-", "bg-")}`} />
+                {label}
+              </button>
+            );
+          })}
         </div>
-      ) : null}
+      )}
 
+      {/* Viewer + Diagnóstico */}
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <ClauseViewer
-            nomeArquivo={meta.nome}
+            nomeArquivo={meta?.nome ?? id}
             risco={risco}
-            totalPaginas={analise.paginas}
             texto={texto_extraido}
           />
         </div>
         <div className="lg:col-span-2">
-          <DiagnosticPanel risco={risco} />
+          <DiagnosticPanel risco={risco} recomendacaoGeral={analise.recomendacao} />
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <Card className="p-5">
-          <h3 className="text-base font-semibold text-ink-900">Resumo do contrato</h3>
-          <p className="mt-2 text-sm leading-relaxed text-ink-600">{analise.resumo}</p>
-          <p className="mt-3 text-xs text-ink-400">
-            Tipo: <span className="font-semibold text-ink-700">{analise.tipo_documento}</span> · Confiança geral:{" "}
-            <span className="font-semibold text-ink-700">
-              {Math.round((analise.confianca_geral ?? 0) * 100)}%
-            </span>
-          </p>
-        </Card>
+      {/* Recomendação geral + Cláusulas faltantes */}
+      {(analise.recomendacao || faltantes.length > 0) && (
+        <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {analise.recomendacao && (
+            <Card className="p-5">
+              <h3 className="text-base font-semibold text-ink-900">Recomendação geral</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-600">{analise.recomendacao}</p>
+            </Card>
+          )}
 
-        <Card className="p-5">
-          <h3 className="text-base font-semibold text-ink-900">Recomendação geral</h3>
-          <p className="mt-2 text-sm leading-relaxed text-ink-600">{analise.recomendacao}</p>
-          {analise.informacoes_faltantes?.length ? (
-            <>
-              <p className="mt-4 text-[11px] font-semibold uppercase tracking-wider text-ink-400">
-                Informações faltantes
-              </p>
-              <ul className="mt-2 space-y-1 text-sm text-ink-600">
-                {analise.informacoes_faltantes.map((i, idx) => (
-                  <li key={idx}>• {i}</li>
+          {faltantes.length > 0 && (
+            <Card className="p-5">
+              <h3 className="text-base font-semibold text-ink-900">Cláusulas faltantes</h3>
+              <p className="mt-1 text-xs text-ink-400">A IA identificou as seguintes lacunas no contrato</p>
+              <ul className="mt-3 space-y-2">
+                {faltantes.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-ink-600">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-ink-100 text-[10px] font-bold text-ink-500">
+                      {idx + 1}
+                    </span>
+                    {item}
+                  </li>
                 ))}
               </ul>
-            </>
-          ) : null}
-        </Card>
-      </section>
+            </Card>
+          )}
+        </section>
+      )}
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center gap-2 border-t border-amber-200 bg-amber-50 px-4 py-2.5">
+        <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
+        <p className="text-xs text-amber-700">
+          Ao recarregar a página você perderá esta análise e precisará enviar o contrato novamente.
+        </p>
+      </div>
     </div>
   );
 }
 
-function CategoryChip({ color, label }) {
-  const cls =
-    {
-      rose: "bg-rose-50 text-rose-700 ring-rose-200",
-      amber: "bg-amber-50 text-amber-700 ring-amber-200",
-      brand: "bg-brand-50 text-brand-700 ring-brand-200",
-    }[color] || "bg-ink-50 text-ink-700 ring-ink-200";
+function SeverityChip({ count, cfg }) {
+  const Icon = cfg.icon;
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${cls}`}>
-      {label}
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${cfg.bg} ${cfg.color} ${cfg.ring}`}>
+      <Icon className="h-3.5 w-3.5" />
+      {count} {cfg.label}
+    </span>
+  );
+}
+
+function FaltanteChip({ count }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-50 px-3 py-1 text-xs font-semibold text-ink-500 ring-1 ring-ink-200">
+      <Info className="h-3.5 w-3.5" />
+      {count} Faltante{count !== 1 ? "s" : ""}
     </span>
   );
 }
