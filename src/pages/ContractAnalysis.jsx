@@ -5,6 +5,7 @@ import Card from "../components/Card.jsx";
 import ClauseViewer from "../components/ClauseViewer.jsx";
 import DiagnosticPanel from "../components/DiagnosticPanel.jsx";
 import { getContract } from "../api/contracts.js";
+import { exportAnalysisPdf } from "../utils/exportPdf.js";
 
 const GRAVIDADE_CONFIG = {
   alta:  { label: "Grave",    icon: AlertTriangle, color: "text-rose-600",   bg: "bg-rose-50",   ring: "ring-rose-200"  },
@@ -67,9 +68,12 @@ export default function ContractAnalysis() {
           <p className="text-xs uppercase tracking-wider text-ink-400">Análise</p>
           <h1 className="text-2xl font-bold text-ink-900">{meta?.nome ?? id}</h1>
         </div>
-        <button className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700">
+        <button
+          onClick={() => exportAnalysisPdf({ fileName: meta?.nome ?? id, analise })}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
+        >
           <Download className="h-4 w-4" />
-          Exportar
+          Exportar PDF
         </button>
       </header>
 
@@ -85,8 +89,16 @@ export default function ContractAnalysis() {
           <p className="mt-1 text-xs text-ink-500">Problemas e lacunas encontradas</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <SeverityChip count={graves.length}   cfg={GRAVIDADE_CONFIG.alta}  />
-            <SeverityChip count={medias.length}   cfg={GRAVIDADE_CONFIG.media} />
+            <SeverityChip
+              count={graves.length}
+              cfg={GRAVIDADE_CONFIG.alta}
+              onClick={graves.length > 0 ? () => setRiscoIdx(analise.riscos.findIndex(r => r.gravidade === "alta")) : undefined}
+            />
+            <SeverityChip
+              count={medias.length}
+              cfg={GRAVIDADE_CONFIG.media}
+              onClick={medias.length > 0 ? () => setRiscoIdx(analise.riscos.findIndex(r => r.gravidade === "media")) : undefined}
+            />
             <FaltanteChip count={faltantes.length} />
           </div>
         </Card>
@@ -140,7 +152,7 @@ export default function ContractAnalysis() {
           />
         </div>
         <div className="lg:col-span-2">
-          <DiagnosticPanel risco={risco} recomendacaoGeral={analise.recomendacao} />
+          <DiagnosticPanel risco={risco} />
         </div>
       </section>
 
@@ -183,10 +195,13 @@ export default function ContractAnalysis() {
   );
 }
 
-function SeverityChip({ count, cfg }) {
+function SeverityChip({ count, cfg, onClick }) {
   const Icon = cfg.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${cfg.bg} ${cfg.color} ${cfg.ring}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${cfg.bg} ${cfg.color} ${cfg.ring} ${onClick ? "cursor-pointer transition-opacity hover:opacity-75" : ""}`}
+      onClick={onClick}
+    >
       <Icon className="h-3.5 w-3.5" />
       {count} {cfg.label}
     </span>

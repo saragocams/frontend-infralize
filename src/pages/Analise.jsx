@@ -7,6 +7,7 @@ import { analyzeContract } from "../api/contracts.js";
 import Card from "../components/Card.jsx";
 import ClauseViewer from "../components/ClauseViewer.jsx";
 import DiagnosticPanel from "../components/DiagnosticPanel.jsx";
+import { exportAnalysisPdf } from "../utils/exportPdf.js";
 
 const GRAVIDADE_CONFIG = {
   alta:  { label: "Grave", icon: AlertTriangle, color: "text-rose-600",    bg: "bg-rose-50",    ring: "ring-rose-200"   },
@@ -169,7 +170,7 @@ function LoadingScreen({ fileName }) {
         <Loader2 className="mx-auto mt-6 h-8 w-8 animate-spin text-brand-600" />
         <p className="mt-4 text-lg font-semibold text-ink-900">Analisando contrato…</p>
         <p className="mt-1 text-sm text-slate-500">{fileName}</p>
-        <p className="mt-1 text-xs text-slate-400">Isso pode levar até 1 minuto</p>
+        <p className="mt-1 text-xs text-slate-400">Isso pode levar alguns minutos</p>
       </div>
     </div>
   );
@@ -228,9 +229,12 @@ function ResultScreen({ result, fileName, onReset }) {
             <RotateCcw className="h-4 w-4" />
             Nova análise
           </button>
-          <button className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700">
+          <button
+            onClick={() => exportAnalysisPdf({ fileName, analise })}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
+          >
             <Download className="h-4 w-4" />
-            Exportar
+            Exportar PDF
           </button>
         </div>
       </header>
@@ -348,10 +352,18 @@ function ResultScreen({ result, fileName, onReset }) {
             {showFaltantes && faltantes[faltanteIdx] ? (
               <FaltantePanel faltante={faltantes[faltanteIdx]} />
             ) : (
-              <DiagnosticPanel risco={risco} recomendacaoGeral={analise.recomendacao} />
+              <DiagnosticPanel risco={risco} />
             )}
           </div>
         </section>
+
+        {/* Relatório Completo */}
+        {analise.recomendacao && (
+          <Card className="!bg-blue-50 !border-blue-100 p-5">
+            <h3 className="text-base font-semibold text-blue-900">Relatório Completo</h3>
+            <p className="mt-2 text-sm leading-relaxed text-blue-800">{analise.recomendacao}</p>
+          </Card>
+        )}
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center gap-2 border-t border-amber-200 bg-amber-50 px-4 py-2.5">

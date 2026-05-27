@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Sparkles, Lightbulb, FileDown, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, Lightbulb } from "lucide-react";
 
 const GRAVIDADE_LABEL = { alta: "Grave", media: "Média", baixa: "Baixo" };
 const GRAVIDADE_COLOR = {
@@ -8,9 +7,7 @@ const GRAVIDADE_COLOR = {
   baixa: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30",
 };
 
-export default function DiagnosticPanel({ risco, recomendacaoGeral }) {
-  const [showRelatorio, setShowRelatorio] = useState(false);
-
+export default function DiagnosticPanel({ risco }) {
   if (!risco) return null;
 
   return (
@@ -43,24 +40,6 @@ export default function DiagnosticPanel({ risco, recomendacaoGeral }) {
           </p>
           <p className="mt-1 text-sm text-ink-300">{risco.pergunta_sugerida}</p>
         </div>
-
-        <button
-          onClick={() => setShowRelatorio((v) => !v)}
-          className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15"
-        >
-          <FileDown className="h-4 w-4" />
-          Relatório Completo
-          {showRelatorio ? <ChevronUp className="ml-auto h-4 w-4" /> : <ChevronDown className="ml-auto h-4 w-4" />}
-        </button>
-
-        {showRelatorio && recomendacaoGeral && (
-          <div className="mt-3 rounded-lg bg-white/5 p-3 ring-1 ring-white/10">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-300">
-              Relatório
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-ink-300">{recomendacaoGeral}</p>
-          </div>
-        )}
       </div>
     </div>
   );
